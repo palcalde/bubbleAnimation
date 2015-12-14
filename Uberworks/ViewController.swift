@@ -48,6 +48,7 @@ class ViewController: UIViewController {
         circleMaskTransform.timingFunctions = [CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut),CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut),CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)]
 
         circleMaskTransform.duration = duration * 2
+        circleMaskTransform.repeatDuration = CFTimeInterval.infinity
         circleMaskTransform.values = [
             NSValue(CATransform3D: CATransform3DIdentity),
             NSValue(CATransform3D: CATransform3DMakeScale(1.3, 1.3, 1.0)),
@@ -89,6 +90,7 @@ class ViewController: UIViewController {
         animation.fillMode = kCAFillModeBoth
         animation.autoreverses = true
         animation.removedOnCompletion = true
+        animation.repeatDuration = CFTimeInterval.infinity
         animation.delegate = self
         circle.addAnimation(animation, forKey: animation.keyPath)
         
@@ -118,19 +120,30 @@ class ViewController: UIViewController {
         animation.duration = duration
         animation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)
         animation.fillMode = kCAFillModeForwards
-        animation.autoreverses = false
+        animation.autoreverses = true
+        animation.repeatDuration = CFTimeInterval.infinity
         animation.removedOnCompletion = true
         circleBorder.addAnimation(animation, forKey: animation.keyPath)
+        
+        let animateOpacity = CABasicAnimation(keyPath: "opacity")
+        animateOpacity.fromValue = 1.0
+        animateOpacity.toValue = 0.0
+        animateOpacity.duration = duration
+        animateOpacity.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)
+        animateOpacity.fillMode = kCAFillModeForwards
 
-        UIView.animateWithDuration(duration, delay: 0, options: [.CurveEaseOut], animations: { () -> Void in
-            circleBorder.opacity = 0.0
-            }, completion: nil)
+
+        let animationGroup = CAAnimationGroup()
+        animationGroup.duration = duration*2;
+        animationGroup.repeatDuration = CFTimeInterval.infinity;
+        animationGroup.animations = [animateOpacity]
+        
+        circleBorder.addAnimation(animationGroup, forKey: animateOpacity.keyPath)
+
         return circleBorder
     }
     
     override func animationDidStop(anim: CAAnimation, finished flag: Bool) {
-        print(self.view.layer.sublayers)
-        self.view.layer.sublayers = nil;
-        triggerAnimation()
+        print("animation stopped")
     }
 }
