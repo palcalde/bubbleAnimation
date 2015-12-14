@@ -96,15 +96,14 @@ class ViewController: UIViewController {
         
         
         delay(seconds: duration) { () -> () in
-            circle.addSublayer((self.animatedCircleBorderAtPoint(center, radius: expandedRadius)))
+            circle.addSublayer((self.animatedCircleBorderAtPoint(center, radius: expandedRadius, timesBigger: 1.2)))
         }
         
         return circle
     }
     
-    func animatedCircleBorderAtPoint(center: CGPoint, radius: CGFloat) -> CAShapeLayer {
+    func animatedCircleBorderAtPoint(center: CGPoint, radius: CGFloat, timesBigger:CGFloat) -> CAShapeLayer {
         let borderPath = UIBezierPath(arcCenter: center, radius: radius, startAngle: 0, endAngle: CGFloat(2.0 * M_PI), clockwise: true);
-        let expandedCirclePath = UIBezierPath(arcCenter:center, radius:radius+10, startAngle: 0, endAngle: CGFloat(2.0 * M_PI), clockwise: true);
 
         let circleBorder = CAShapeLayer()
         circleBorder.path = borderPath.CGPath
@@ -114,8 +113,16 @@ class ViewController: UIViewController {
         circleBorder.lineWidth = 2.0
         circleBorder.opacity = 1
         
+        self.addExplosionLayerAroundCircle(circleBorder, center: center, radius: radius, timesBigger: timesBigger)
+
+        return circleBorder
+    }
+    
+    func addExplosionLayerAroundCircle(circleBorder: CAShapeLayer, center: CGPoint, radius:(CGFloat), timesBigger: CGFloat) {
+        let expandedCirclePath = UIBezierPath(arcCenter:center, radius:radius*timesBigger, startAngle: 0, endAngle: CGFloat(2.0 * M_PI), clockwise: true);
+
         let animation = CABasicAnimation(keyPath: "path")
-        animation.fromValue = borderPath.CGPath
+        animation.fromValue = circleBorder.path
         animation.toValue = expandedCirclePath.CGPath
         animation.duration = duration
         animation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)
@@ -131,16 +138,13 @@ class ViewController: UIViewController {
         animateOpacity.duration = duration
         animateOpacity.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)
         animateOpacity.fillMode = kCAFillModeForwards
-
-
+        
         let animationGroup = CAAnimationGroup()
         animationGroup.duration = duration*2;
         animationGroup.repeatDuration = CFTimeInterval.infinity;
         animationGroup.animations = [animateOpacity]
         
         circleBorder.addAnimation(animationGroup, forKey: animateOpacity.keyPath)
-
-        return circleBorder
     }
     
     override func animationDidStop(anim: CAAnimation, finished flag: Bool) {
