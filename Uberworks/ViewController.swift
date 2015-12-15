@@ -136,7 +136,7 @@ class ViewController: UIViewController {
             print("shrink finished")
             self.circleLayer.removeAnimationForKey("shrink")
             if (self.finishAnimation) {
-                self.finish()
+                self.finishWithSpring()
             } else {
                 self.expand()
             }
@@ -160,12 +160,38 @@ class ViewController: UIViewController {
     }
     
     func finish() {
-        self.circleLayer.addAnimation(self.transformAnimation(1.0), forKey: "finish")
+        let expandAnim = self.transformAnimation(1.0)
+        expandAnim.duration = duration/2
+        self.circleLayer.addAnimation(expandAnim, forKey: "finish")
         let animateOpacity = CABasicAnimation(keyPath: "opacity")
         animateOpacity.fromValue = 0.0
         animateOpacity.toValue = 1.0
-        animateOpacity.duration = duration
-        animateOpacity.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)
+        animateOpacity.duration = duration/2
+        animateOpacity.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseIn)
+        animateOpacity.fillMode = kCAFillModeForwards
+        animateOpacity.repeatCount = 1
+        self.ringLayer.opacity = 1;
+        self.ringLayer.addAnimation(animateOpacity, forKey: "ringLayer")
+    }
+    
+    func finishWithSpring() {
+        let expandAnim = CASpringAnimation(keyPath: "transform")
+        expandAnim.toValue = NSValue(CATransform3D: CATransform3DMakeScale(1.0, 1.0, 1.0))
+        expandAnim.duration = duration
+        expandAnim.fillMode = kCAFillModeForwards
+        expandAnim.removedOnCompletion = false
+        expandAnim.repeatCount = 1
+        expandAnim.mass = 1.0
+        expandAnim.damping = 10.0
+        expandAnim.delegate = self
+        self.circleLayer.addAnimation(expandAnim, forKey: "finish")
+        
+        
+        let animateOpacity = CABasicAnimation(keyPath: "opacity")
+        animateOpacity.fromValue = 0.0
+        animateOpacity.toValue = 1.0
+        animateOpacity.duration = duration/2
+        animateOpacity.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseIn)
         animateOpacity.fillMode = kCAFillModeForwards
         animateOpacity.repeatCount = 1
         self.ringLayer.opacity = 1;
