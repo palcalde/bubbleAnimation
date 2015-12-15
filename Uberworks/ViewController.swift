@@ -19,13 +19,40 @@ func delay(seconds seconds: Double, completion:()->()) {
 
 class ViewController: UIViewController {
     let duration = 1.0
-//    var image = UIImage(named: "like")
+    let radius : CGFloat = 20.0
+    var circleLayer : CAShapeLayer!
+    var imageLayer : CALayer!
+    var ringLayer : CAShapeLayer!
+    var finishAnimation = false
+    
     var image = UIImage(named: "gps-marker")
 
     override func viewDidLoad() {
         super.viewDidLoad()
         triggerAnimation()
-        self.view.userInteractionEnabled = false
+    }
+    
+    
+    func triggerAnimation() {
+        self.ringLayer = self.ringLayer(self.view.center, radius: self.radius)
+        self.circleLayer = self.circleAtPoint(self.view.center, radius: radius)
+        self.imageLayer = self.createImageLayers(self.image!)
+        self.circleLayer.addSublayer(self.imageLayer)
+        self.view.layer.addSublayer(self.circleLayer)
+        self.view.layer.addSublayer(self.ringLayer)
+        self.shrink()
+    }
+    
+    func circleAtPoint(center: CGPoint, radius: CGFloat) -> CAShapeLayer {
+        let circlePath = UIBezierPath(arcCenter:center, radius:radius, startAngle: 0, endAngle: CGFloat(2.0 * M_PI), clockwise: true);
+        let circle = CAShapeLayer()
+        circle.path = circlePath.CGPath
+        circle.lineCap = kCALineCapRound
+        circle.strokeColor = UIColor.whiteColor().CGColor
+        circle.fillColor = UIColor.whiteColor().CGColor
+        circle.bounds = CGRectMake(0, 0, self.view.bounds.width, self.view.bounds.height)
+        circle.frame = CGRectMake(0, 0, self.view.bounds.width, self.view.bounds.height)
+        return circle
     }
     
     private func createImageLayers(image: UIImage) -> CALayer {
@@ -44,65 +71,23 @@ class ViewController: UIViewController {
         imageShapeLayer.mask!.position = imgCenterPoint
         imageShapeLayer.contentsScale = UIScreen.mainScreen().scale
         
-        let circleMaskTransform = CAKeyframeAnimation(keyPath: "transform")
-        circleMaskTransform.timingFunctions = [CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut),CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut),CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)]
-
-        circleMaskTransform.duration = duration * 2
-        circleMaskTransform.repeatDuration = CFTimeInterval.infinity
-        circleMaskTransform.values = [
-            NSValue(CATransform3D: CATransform3DIdentity),
-            NSValue(CATransform3D: CATransform3DMakeScale(1.3, 1.3, 1.0)),
-            NSValue(CATransform3D: CATransform3DIdentity)
-        ]
-        circleMaskTransform.keyTimes = [
-            0.0,
-            0.6,
-            1.0
-        ]
-
-        
-        imageShapeLayer.addAnimation(circleMaskTransform, forKey: circleMaskTransform.keyPath)
         return imageShapeLayer
     }
     
-    func triggerAnimation() {
-        self.view.layer.addSublayer(self.animatedCircleAtPoint(self.view.center, radius: 20))
-        self.view.layer.addSublayer(self.createImageLayers(self.image!))
-    }
-    
-    func animatedCircleAtPoint(center: CGPoint, radius: CGFloat) -> CAShapeLayer {
-        let circle = CAShapeLayer()
-        let circlePath = UIBezierPath(arcCenter:center, radius:radius, startAngle: 0, endAngle: CGFloat(2.0 * M_PI), clockwise: true);
-        let expandedRadius = radius+10
-        let expandedCirclePath = UIBezierPath(arcCenter:center, radius:expandedRadius, startAngle: 0, endAngle: CGFloat(2.0 * M_PI), clockwise: true);
-        
-        circle.path = circlePath.CGPath
-        circle.lineCap = kCALineCapRound
-        circle.strokeColor = UIColor.whiteColor().CGColor
-        circle.fillColor = UIColor.whiteColor().CGColor
-        circle.contents = image?.CGImage
-        
-        let animation = CABasicAnimation(keyPath: "path")
-        animation.fromValue = circlePath.CGPath
-        animation.toValue = expandedCirclePath.CGPath
+    func transformAnimation(timesBigger: CGFloat) -> CABasicAnimation {
+        let animation = CABasicAnimation(keyPath: "transform")
+        animation.toValue = NSValue(CATransform3D: CATransform3DMakeScale(timesBigger, timesBigger, 1.0))
         animation.duration = duration
         animation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)
-        animation.fillMode = kCAFillModeBoth
-        animation.autoreverses = true
-        animation.removedOnCompletion = true
-        animation.repeatDuration = CFTimeInterval.infinity
+        animation.fillMode = kCAFillModeForwards
+        animation.autoreverses = false
+        animation.removedOnCompletion = false
+        animation.repeatCount = 1
         animation.delegate = self
-        circle.addAnimation(animation, forKey: animation.keyPath)
-        
-        
-        delay(seconds: duration) { () -> () in
-            circle.addSublayer((self.animatedCircleBorderAtPoint(center, radius: expandedRadius, timesBigger: 1.2)))
-        }
-        
-        return circle
+        return animation
     }
     
-    func animatedCircleBorderAtPoint(center: CGPoint, radius: CGFloat, timesBigger:CGFloat) -> CAShapeLayer {
+    func ringLayer(center: CGPoint, radius: CGFloat) -> CAShapeLayer {
         let borderPath = UIBezierPath(arcCenter: center, radius: radius, startAngle: 0, endAngle: CGFloat(2.0 * M_PI), clockwise: true);
 
         let circleBorder = CAShapeLayer()
@@ -110,28 +95,17 @@ class ViewController: UIViewController {
         circleBorder.lineCap = kCALineCapRound
         circleBorder.strokeColor = UIColor.whiteColor().CGColor
         circleBorder.fillColor = UIColor.clearColor().CGColor
-        circleBorder.lineWidth = 2.0
-        circleBorder.opacity = 1
-        
-        self.addExplosionLayerAroundCircle(circleBorder, center: center, radius: radius, timesBigger: timesBigger)
+        circleBorder.lineWidth = 1.0
+        circleBorder.opacity = 0
+        circleBorder.frame = self.view.frame
 
         return circleBorder
     }
     
-    func addExplosionLayerAroundCircle(circleBorder: CAShapeLayer, center: CGPoint, radius:(CGFloat), timesBigger: CGFloat) {
-        let expandedCirclePath = UIBezierPath(arcCenter:center, radius:radius*timesBigger, startAngle: 0, endAngle: CGFloat(2.0 * M_PI), clockwise: true);
-
-        let animation = CABasicAnimation(keyPath: "path")
-        animation.fromValue = circleBorder.path
-        animation.toValue = expandedCirclePath.CGPath
-        animation.duration = duration
-        animation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)
-        animation.fillMode = kCAFillModeForwards
-        animation.autoreverses = true
-        animation.repeatDuration = CFTimeInterval.infinity
-        animation.removedOnCompletion = true
+    func addExpandedAnimationToLayer(circleBorder: CAShapeLayer, timesBigger: CGFloat) {
+        let animation = self.transformAnimation(timesBigger)
         circleBorder.addAnimation(animation, forKey: animation.keyPath)
-        
+
         let animateOpacity = CABasicAnimation(keyPath: "opacity")
         animateOpacity.fromValue = 1.0
         animateOpacity.toValue = 0.0
@@ -139,15 +113,62 @@ class ViewController: UIViewController {
         animateOpacity.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)
         animateOpacity.fillMode = kCAFillModeForwards
         
-        let animationGroup = CAAnimationGroup()
-        animationGroup.duration = duration*2;
-        animationGroup.repeatDuration = CFTimeInterval.infinity;
-        animationGroup.animations = [animateOpacity]
-        
-        circleBorder.addAnimation(animationGroup, forKey: animateOpacity.keyPath)
+        circleBorder.addAnimation(animateOpacity, forKey: animateOpacity.keyPath)
+    }
+    
+    @IBAction func buttonTapped(sender: AnyObject) {
+        let button = sender as! UIButton
+        if (self.finishAnimation) {
+            button.setTitle("STOP", forState: UIControlState.Normal)
+            self.finishAnimation = false
+            self.shrink()
+        } else {
+            button.setTitle("START", forState: UIControlState.Normal)
+            self.finishAnimation = true
+        }
     }
     
     override func animationDidStop(anim: CAAnimation, finished flag: Bool) {
-        print("animation stopped")
+        if let presentationLayer = self.circleLayer.presentationLayer() {
+            self.circleLayer.transform = presentationLayer.transform
+        }
+        if anim == self.circleLayer.animationForKey("shrink") {
+            print("shrink finished")
+            self.circleLayer.removeAnimationForKey("shrink")
+            if (self.finishAnimation) {
+                self.finish()
+            } else {
+                self.expand()
+            }
+        } else if anim == self.circleLayer.animationForKey("expand")  {
+            print("expansion finished")
+            self.circleLayer.removeAnimationForKey("expand")
+            self.shrink()
+        } else if anim == self.circleLayer.animationForKey("finish")  {
+            self.circleLayer.removeAnimationForKey("finish")
+        }
+    }
+    
+    func expand() {
+        self.circleLayer.addAnimation(self.transformAnimation(1.0), forKey: "expand")
+    }
+    
+    func shrink() {
+        self.circleLayer.addAnimation(self.transformAnimation(0.7), forKey: "shrink")
+        self.ringLayer.opacity = 0
+        self.addExpandedAnimationToLayer(self.ringLayer, timesBigger: 1.3)
+    }
+    
+    func finish() {
+        self.circleLayer.addAnimation(self.transformAnimation(1.0), forKey: "finish")
+        let animateOpacity = CABasicAnimation(keyPath: "opacity")
+        animateOpacity.fromValue = 0.0
+        animateOpacity.toValue = 1.0
+        animateOpacity.duration = duration
+        animateOpacity.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)
+        animateOpacity.fillMode = kCAFillModeForwards
+        animateOpacity.repeatCount = 1
+        self.ringLayer.opacity = 1;
+        self.ringLayer.addAnimation(animateOpacity, forKey: "ringLayer")
     }
 }
