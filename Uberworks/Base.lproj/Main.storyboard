@@ -17,8 +17,14 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VAY-SU-Mb1">
-                                <rect key="frame" x="280" y="505" width="41" height="30"/>
-                                <state key="normal" title="Finish"/>
+                                <rect key="frame" x="273" y="491" width="55" height="44"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="mwY-EJ-u8t"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="HelveticaNeue-Medium" family="Helvetica Neue" pointSize="20"/>
+                                <state key="normal" title="Finish">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
                                 <connections>
                                     <action selector="buttonTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="7ZZ-Ny-8PC"/>
                                 </connections>
@@ -30,6 +36,9 @@
                             <constraint firstItem="VAY-SU-Mb1" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="WXZ-kg-gf7"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="doneButton" destination="VAY-SU-Mb1" id="1D4-ra-HFB"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>

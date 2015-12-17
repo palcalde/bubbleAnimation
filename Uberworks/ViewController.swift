@@ -17,9 +17,10 @@ func delay(seconds seconds: Double, completion:()->()) {
 }
 
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, BubbleButtonProtocol {
     var image = UIImage(named: "gps-marker")
     var button : BubbleButton!
+    @IBOutlet weak var doneButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,18 +28,23 @@ class ViewController: UIViewController {
         imageView.frame = CGRectMake(0, 0, 50, 50)
         self.button = BubbleButton.init(frame: CGRectMake(0, 0, 100, 100), imageView: imageView)
         self.button.center = self.view.center
+        self.button.delegate = self
         self.view.addSubview(button)
+        self.button.start()
     }
     
     @IBAction func buttonTapped(sender: AnyObject) {
         let button = sender as! UIButton
-        if (self.button.finishAnimation) {
-            button.setTitle("STOP", forState: UIControlState.Normal)
-            self.button.finishAnimation = false
-            self.button.shrink()
+        if (!self.button.finishAnimation) {
+            self.button.stop()
         } else {
-            button.setTitle("START", forState: UIControlState.Normal)
-            self.button.finishAnimation = true
+            button.setTitle("STOP", forState: UIControlState.Normal)
+            self.button.start()
         }
+    }
+    
+    func didFinishAnimating() {
+        self.doneButton.setTitle("START", forState: UIControlState.Normal)
+        print("animation finished")
     }
 }

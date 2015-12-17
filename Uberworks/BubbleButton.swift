@@ -9,13 +9,17 @@
 import Foundation
 import UIKit
 
+protocol BubbleButtonProtocol {
+    func didFinishAnimating()
+}
+
 class BubbleButton: UIView {
-    let duration = 1.0
-    let radius : CGFloat = 20.0
-    var circleLayer : CAShapeLayer!
-    var imageLayer : CALayer!
-    var ringLayer : CAShapeLayer!
-    var finishAnimation = false
+    private let duration = 1.0
+    private var circleLayer : CAShapeLayer!
+    private var imageLayer : CALayer!
+    private var ringLayer : CAShapeLayer!
+    private(set) var finishAnimation = false
+    internal var delegate : BubbleButtonProtocol?
     
     init(frame: CGRect, imageView: UIImageView?) {
         super.init(frame: frame)
@@ -38,13 +42,17 @@ class BubbleButton: UIView {
     }
     
     func start() {
-        if (!self.finishAnimation) {
-            
-        }
+        self.finishAnimation = false
+        self.circleLayer.removeAllAnimations()
+        self.ringLayer.removeAllAnimations()
+        self.shrink()
+        
+        if let presentationLayer = self.ringLayer.presentationLayer() { self.ringLayer.transform = presentationLayer.transform }
+        addExpandedAnimationToLayer(self.ringLayer, timesBigger: 1.5)
     }
     
     func stop() {
-        
+        self.finishAnimation = true
     }
     
     private func circleAtPoint(center: CGPoint, radius: CGFloat) -> CAShapeLayer {
@@ -102,9 +110,9 @@ class BubbleButton: UIView {
         return circleBorder
     }
     
-    private func addExpandedAnimationToLayer(circleBorder: CAShapeLayer, timesBigger: CGFloat) {
+    private func addExpandedAnimationToLayer(layer: CAShapeLayer, timesBigger: CGFloat) {
         let animation = self.transformAnimation(timesBigger)
-        circleBorder.addAnimation(animation, forKey: animation.keyPath)
+        layer.addAnimation(animation, forKey: animation.keyPath)
         
         let animateOpacity = CABasicAnimation(keyPath: "opacity")
         animateOpacity.fromValue = 1.0
@@ -113,7 +121,7 @@ class BubbleButton: UIView {
         animateOpacity.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)
         animateOpacity.fillMode = kCAFillModeForwards
         
-        circleBorder.addAnimation(animateOpacity, forKey: animateOpacity.keyPath)
+        layer.addAnimation(animateOpacity, forKey: animateOpacity.keyPath)
     }
     
     private func expand() {
@@ -123,7 +131,6 @@ class BubbleButton: UIView {
     private func shrink() {
         self.circleLayer.addAnimation(self.transformAnimation(0.7), forKey: "shrink")
         self.ringLayer.opacity = 0
-        self.addExpandedAnimationToLayer(self.ringLayer, timesBigger: 1.3)
     }
     
     private func finish() {
@@ -137,8 +144,9 @@ class BubbleButton: UIView {
         animateOpacity.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseIn)
         animateOpacity.fillMode = kCAFillModeForwards
         animateOpacity.repeatCount = 1
-        self.ringLayer.opacity = 1;
+        self.ringLayer.opacity = 1
         self.ringLayer.addAnimation(animateOpacity, forKey: "ringLayer")
+        self.addExpandedAnimationToLayer(self.ringLayer, timesBigger: 1.3)
     }
     
    private func finishWithSpring() {
@@ -166,11 +174,9 @@ class BubbleButton: UIView {
     }
     
     override func animationDidStop(anim: CAAnimation, finished flag: Bool) {
-        if let presentationLayer = self.circleLayer.presentationLayer() {
-            self.circleLayer.transform = presentationLayer.transform
-        }
+        if let circlePresentationLayer = self.circleLayer.presentationLayer() { self.circleLayer.transform = circlePresentationLayer.transform }
+        
         if anim == self.circleLayer.animationForKey("shrink") {
-            print("shrink finished")
             self.circleLayer.removeAnimationForKey("shrink")
             if (self.finishAnimation) {
                 self.finishWithSpring()
@@ -178,11 +184,13 @@ class BubbleButton: UIView {
                 self.expand()
             }
         } else if anim == self.circleLayer.animationForKey("expand")  {
-            print("expansion finished")
             self.circleLayer.removeAnimationForKey("expand")
             self.shrink()
+            self.ringLayer.transform = CATransform3DIdentity
+            addExpandedAnimationToLayer(self.ringLayer, timesBigger: 1.3)
         } else if anim == self.circleLayer.animationForKey("finish")  {
             self.circleLayer.removeAnimationForKey("finish")
+            self.delegate?.didFinishAnimating()
         }
     }
 }
