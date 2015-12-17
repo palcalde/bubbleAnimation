@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6E7A2E741C215D11008AA226 /* BubbleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E7A2E731C215D11008AA226 /* BubbleButton.swift */; };
 		9C69EBC91BE2819000BBCFBF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C69EBC81BE2819000BBCFBF /* AppDelegate.swift */; };
 		9C69EBCB1BE2819000BBCFBF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C69EBCA1BE2819000BBCFBF /* ViewController.swift */; };
 		9C69EBCE1BE2819000BBCFBF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9C69EBCC1BE2819000BBCFBF /* Main.storyboard */; };
@@ -21,6 +22,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6E7A2E731C215D11008AA226 /* BubbleButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BubbleButton.swift; sourceTree = "<group>"; };
 		9C69EBC51BE2819000BBCFBF /* Uberworks.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Uberworks.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9C69EBC81BE2819000BBCFBF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9C69EBCA1BE2819000BBCFBF /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -73,6 +75,7 @@
 				9C69EBCF1BE2819000BBCFBF /* Assets.xcassets */,
 				9C69EBD11BE2819000BBCFBF /* LaunchScreen.storyboard */,
 				9C69EBD41BE2819000BBCFBF /* Info.plist */,
+				6E7A2E731C215D11008AA226 /* BubbleButton.swift */,
 			);
 			path = Uberworks;
 			sourceTree = "<group>";
@@ -175,6 +178,7 @@
 				9C69EBE81BE281FF00BBCFBF /* RBBBlockBasedArray.swift in Sources */,
 				9C69EBCB1BE2819000BBCFBF /* ViewController.swift in Sources */,
 				9C69EBC91BE2819000BBCFBF /* AppDelegate.swift in Sources */,
+				6E7A2E741C215D11008AA226 /* BubbleButton.swift in Sources */,
 				9C69EBE41BE281FF00BBCFBF /* EAAnimationDelayed.swift in Sources */,
 				9C69EBEA1BE281FF00BBCFBF /* RBBSpringAnimation.swift in Sources */,
 			);
@@ -326,6 +330,7 @@
 				9C69EBD91BE2819000BBCFBF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
