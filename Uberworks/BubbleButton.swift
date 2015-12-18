@@ -171,6 +171,8 @@ class BubbleButton: UIView {
         animateOpacity.repeatCount = 1
         self.ringLayer.opacity = 1;
         self.ringLayer.addAnimation(animateOpacity, forKey: "ringLayer")
+    
+        self.ringLayer.addAnimation(self.transformAnimation(1.4), forKey: "transform")
     }
     
     override func animationDidStop(anim: CAAnimation, finished flag: Bool) {
